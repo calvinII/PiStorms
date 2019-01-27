@@ -68,16 +68,16 @@ sudo cp /tmp/config.txt /boot/config.txt
 
 echo "Depending on your internet connection, the following few steps may take several minutes."
 echo "Updating package lists..."
-sudo apt-get -qq -y update
+sudo apt-get -y update &>> /tmp/install.debug
 echo "Downloading and installing 15 required packages..."
-sudo apt-get -qq -y install build-essential git nmap mpg123 apache2 php5 libapache2-mod-php5 libapache2-mod-php\
-                            python-numpy python-matplotlib python-scipy python-opencv \
-                            python-dev python-smbus python-pip python-imaging &> /dev/null
+sudo apt-get -qq -y install build-essential git nmap mpg123 apache2 php7.0 libapache2-mod-php7.0 libapache2-mod-php\
+                            python-numpy python-matplotlib python-scipy python-opencv raspberry-artwork\
+                            python-dev python-smbus python-pip python-imaging python-flask 
 echo "Updating pip..."
-sudo pip -qq install --upgrade pip
+sudo pip install --upgrade pip 
 echo "Downloading and installing 7 required Python packages..."
-sudo pip -qq install --upgrade mindsensors-i2c
-sudo pip -qq install RPi.GPIO wireless wifi ws4py flask imutils python-imaging
+sudo pip install --upgrade mindsensors-i2c 
+sudo pip install RPi.GPIO wireless wifi ws4py imutils 
 
 
 echo "Copying files..."
@@ -192,7 +192,7 @@ sudo crontab -l -u root 2>/dev/null | sudo crontab -u root -
 sudo crontab -u root -l | grep -v 'ps_messenger_check.py' | sudo crontab -u root -
 sudo crontab -u root -l | grep -v 'ps_updater.py' | sudo crontab -u root -
 # setup crontab entry of messenger and updater for root
-sudo crontab -l -u root | grep ps_messenger_check > /dev/null
+sudo crontab -l -u root | grep ps_messenger_check 
 if [ $? != 0 ]
 then
     (sudo crontab -l -u root 2>/dev/null; echo "* */1 * * * python /usr/local/bin/ps_messenger_check.py") | sudo crontab - -u root
@@ -203,18 +203,23 @@ then
     (sudo crontab -l -u root 2>/dev/null; echo "2 */2 * * * python /usr/local/bin/ps_updater.py") | sudo crontab - -u root
 fi
 # run messenger and updater once
-python /usr/local/bin/ps_messenger_check.py > /dev/null
-python /usr/local/bin/ps_updater.py > /dev/null
+python /usr/local/bin/ps_messenger_check.py 
+python /usr/local/bin/ps_updater.py 
 
 
 echo "Installing display libraries..."
 # setup Adafruit GFX library requirement
 cd ~
-git clone -qq https://github.com/adafruit/Adafruit_Python_ILI9341.git
-cd Adafruit_Python_ILI9341
-sudo python setup.py install &> /dev/null
+if [ -d Adafruit_Python_ILI9341 ]
+then
+  cd Adafruit_Python_ILI9341
+    git pull
+else
+  git clone https://github.com/adafruit/Adafruit_Python_ILI9341.git
+  cd Adafruit_Python_ILI9341
+fi
+sudo python setup.py install 
 cd ..
-sudo rm -rf Adafruit_Python_ILI9341
 
 
 echo "Performing a few last configurations..."
